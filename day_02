@@ -1,0 +1,57 @@
+1. Database vs DBMS vs RDBMS
+
+    Database = container of organized data (the books)
+    DBMS = software that manages the database (the librarian). Examples: PostgreSQL, MySQL, MongoDB
+    RDBMS = a DBMS that stores data in TABLES with RELATIONSHIPS. PostgreSQL is an RDBMS.
+    PostgreSQL is highly standards-compliant and open-source — loved by data teams.
+
+2. Tables, Rows, Columns, Schema
+
+    Table = one Excel-like sheet for ONE type of entity
+    Row = one record (also called "record" or "tuple" in Postgres docs)
+    Column = one attribute (also called "field" or "attribute")
+    Schema has TWO meanings:
+        Meaning A: The structure/blueprint of a table (its columns + types)
+        Meaning B: A namespace/folder INSIDE a database that groups tables
+
+3. SCHEMA vs DATABASE (The #1 Beginner Trap)
+
+    DATABASE = top-level container (like sales_db). Fully isolated.
+    SCHEMA = namespace INSIDE a database (like public, staging, analytics)
+    Every database auto-creates one schema called public
+    CREATE SCHEMA test; does NOT create a new database — it creates a namespace inside the current database
+    CREATE DATABASE test_db; creates a new, isolated database
+    You CANNOT query across databases in one SQL statement
+    You CAN query across schemas within the same database
+    Full path: database.schema.table but you can omit database (connected) and schema (if public)
+
+4. SQL is Declarative
+
+    You say WHAT you want, not HOW to get it
+    The PostgreSQL optimizer/planner decides HOW (scan method, join order, index usage)
+    SQL is a query language, NOT a general-purpose programming language
+    CRUD: Create (INSERT), Read (SELECT), Update (UPDATE), Delete (DELETE)
+    Analysts use SELECT 95% of the time
+
+5. SQL vs NoSQL
+
+    SQL = tables, fixed schema, ACID, relationships. Best for structured data + analytics.
+    NoSQL = documents/key-value, flexible schema. Best for unstructured/massive scale.
+    PostgreSQL has JSONB — a hybrid SQL+NoSQL capability
+    Neither is "better" — different tools for different jobs
+
+6. OLTP vs OLAP
+
+    OLTP = many small, fast transactions (INSERT/UPDATE). The shop counter.
+    OLAP = few complex analytical queries (big SELECTs). The manager's office.
+    Same SQL syntax for both. Difference is SCALE and PURPOSE.
+    Companies separate OLTP and OLAP to avoid slowing down production.
+    PostgreSQL can do both, but dedicated warehouses (Snowflake, BigQuery) are better for massive OLAP.
+
+7. Who Uses SQL Daily
+
+    Data Analyst = SELECT for dashboards, ad-hoc business questions
+    Data Scientist = SELECT to pull training data, build features for ML models
+    Data Engineer = CREATE TABLE, COPY, transform pipelines (ELT)
+    Learning path: Master Analyst SQL first → grow into Engineer
+
