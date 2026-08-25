@@ -1,0 +1,40 @@
+1. Numeric Types
+
+    SMALLINT (2 bytes, -32768 to 32767): Small counts, ages
+    INTEGER/INT (4 bytes, -2.1B to 2.1B): Default for most whole numbers
+    BIGINT (8 bytes, ±9 quintillion): Massive IDs, high-volume systems
+    NUMERIC(p,s) / DECIMAL(p,s): Exact arbitrary-precision. ALWAYS use for money. p = total digits, s = digits after decimal. NUMERIC and DECIMAL are 100% identical in Postgres.
+    REAL / DOUBLE PRECISION: Approximate floating-point. NEVER use for money. 0.1 + 0.2 ≠ exactly 0.3.
+    Postgres has NO TINYINT. Use SMALLINT or BOOLEAN.
+    Rounding: Postgres uses "round half away from zero" (12.345 → 12.35).
+
+2. String Types 
+
+    CHAR(n): Fixed-length. Silently pads with trailing spaces. Dangerous for variable-length data. Only for truly fixed codes (2-letter country codes).
+    VARCHAR(n): Variable-length up to n characters. Errors if exceeded.
+    TEXT: Variable-length, no limit (up to 1GB). Postgres docs recommend TEXT everywhere.
+    Performance: CHAR, VARCHAR, and TEXT have IDENTICAL performance in Postgres. Same storage engine.
+    Official recommendation: Use TEXT + CHECK (LENGTH(col) <= n) instead of VARCHAR(n).
+    VARCHAR without a length limit is valid and identical to TEXT.
+    = operator ignores trailing spaces for CHAR. LIKE does NOT.
+
+3. BOOLEAN, UUID, Arrays, ENUM
+
+    BOOLEAN: Native type. Three states: TRUE, FALSE, NULL. Accepts 'yes'/'no'/'t'/'f'/'1'/'0' as input. Displays as t/f or true/false.
+    Casting: TRUE::INTEGER → 1. 5::BOOLEAN → ERROR (Postgres refuses to guess).
+    UUID: Native 128-bit type. gen_random_uuid() for random UUIDv4. uuidv7() for time-ordered (Postgres 17+). Use native UUID type, NOT VARCHAR(36).
+    Arrays: INTEGER[], TEXT[]. Store lists in a single cell. Postgres superpower (MySQL/SQL Server don't have this).
+    ENUM: NO inline shorthand. Must CREATE TYPE ... AS ENUM (...) first, then use the type name. More rigid but safer.
+    BYTEA: Binary data (like BLOB).
+
+4. Date/Time Types
+
+    DATE: Just the calendar date (YYYY-MM-DD). No time.
+    TIME: Just the time of day (HH:MM:SS). No date.
+    TIMESTAMP: Date + Time, NO timezone (naive). Like a wall clock photo.
+    TIMESTAMPTZ: Date + Time WITH timezone. Stored internally as UTC, converted to session timezone on display. ALWAYS use for event/created_at columns.
+    Both TIMESTAMP and TIMESTAMPTZ take exactly 8 bytes. No storage penalty for TIMESTAMPTZ.
+    NOW() returns TIMESTAMPTZ (timezone-aware).
+    Postgres validates dates: 2025-02-30 → ERROR "date out of range".
+    TIMESTAMPTZ internal behavior: Converts to UTC on insert, converts back to session timezone on SELECT.
+    MySQL's NOW() returns DATETIME (no timezone). Postgres' NOW() returns TIMESTAMPTZ. This is a key difference.
