@@ -1,0 +1,50 @@
+1. Sandbox Setup 
+
+    Three tables created: customers (4 cols, 5 rows), employees (8 cols, 4 rows), orders (5 cols, 5 rows)
+    Tables deliberately simplified: no PRIMARY KEY, no NOT NULL, no constraints yet (those come Day 43-48)
+    Deliberate NULLs included: Sam's email, Karan/Rahul's bonus, order id=3's amount
+    CREATE TABLE syntax: CREATE TABLE name (col1 TYPE, col2 TYPE);
+    INSERT syntax: INSERT INTO table (cols) VALUES (vals);
+    Omitted columns in INSERT automatically become NULL (not empty strings)
+    CREATE TABLE on existing table → ERROR: "relation already exists" (use IF NOT EXISTS to avoid)
+    Trailing comma after last item in ANY list → syntax error
+
+2. Single Quotes vs Double Quotes 
+
+    Single quotes '...' = string VALUES (data). 'Delhi', 'hello', '2024-01-05'
+    Double quotes "..." = IDENTIFIERS (names of tables/columns). "first name", "my table"
+    Using double quotes for a value: "Delhi" → ERROR: column "Delhi" does not exist
+    Using single quotes for an identifier: 'city' → treated as the string "city", not the column
+    Escaping apostrophes: double the single quote → 'O''Brien'
+    Backticks ` are MySQL-only → SYNTAX ERROR in PostgreSQL
+    Square brackets [] are SQL Server-only → SYNTAX ERROR in PostgreSQL
+
+3. Case Folding 
+
+    Unquoted identifiers are automatically LOWERCASED by PostgreSQL
+    CREATE TABLE Customers → stored as customers
+    SELECT * FROM CUSTOMERS → looks for customers (lowercased) → matches
+    Quoted identifiers BYPASS case folding → stored EXACTLY as written
+    CREATE TABLE "Customers" → stored as Customers (capital C)
+    Must reference as "Customers" with quotes and exact case FOREVER
+    "city" (lowercase in quotes) matches unquoted city (stored lowercase)
+    "City" (capital in quotes) does NOT match unquoted city
+    GOLDEN RULE: Always use lowercase_with_underscores. Never quote. Never mix case.
+    Case folding does NOT apply to string values: 'Delhi' ≠ 'delhi'
+    Oracle does the OPPOSITE (uppercases unquoted). MySQL depends on OS.
+
+4. SELECT Syntax 
+
+    Basic syntax: SELECT col1, col2 FROM table_name;
+    SELECT list determines which COLUMNS appear in result
+    FROM clause determines which TABLE to read from
+    Number of ROWS = number of rows in the table (or passing WHERE filter)
+    Number of COLUMNS = number of items in SELECT list
+    SELECT * = all columns. BAD for production (schema changes break it, no covering index, slower)
+    SELECT 1+1; works without FROM (PostgreSQL-specific, also MySQL)
+    Oracle requires FROM DUAL for SELECT without a real table
+    SELECT *; without FROM → ERROR: "SELECT * with no tables specified"
+    Missing comma between columns: SELECT id name → name becomes alias for id (silent bug!)
+    Column order in SELECT determines column order in result
+    Trailing comma after last column → syntax error
+    Clause order: SELECT always before FROM. Cannot reorder.
