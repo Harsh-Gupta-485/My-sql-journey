@@ -1,0 +1,34 @@
+1. SELECT * and Why to Avoid It 
+SELECT * expands to ALL columns in definition order
+Three reasons it's bad for production:
+Schema changes break code silently — new columns appear in output, breaking downstream code expecting fixed columns
+Slower queries — fetches unnecessary columns, wastes disk I/O, memory, network
+Cannot use a covering index — no index contains ALL columns, so PostgreSQL must always touch the heap
+SELECT * is acceptable ONLY for quick exploration in pgAdmin (peeking at a new table)
+COUNT(*) is DIFFERENT — the * inside COUNT means "count all rows," does NOT fetch all columns
+SELECT *, city FROM customers; is valid — returns all columns PLUS city again (city appears twice)
+Right now, SELECT * and explicit column list return IDENTICAL results. The difference only manifests when schema changes in the future.
+
+2. Column Aliasing with AS 
+AS renames a column only in the query result, NOT in the actual table
+AS is optional in PostgreSQL but should ALWAYS be written explicitly for readability
+Without AS: SELECT id name FROM customers; → name becomes an alias for id (missing-comma alias trap!)
+Alias with spaces requires double quotes: AS "Customer Name"
+Double-quoted aliases are case-sensitive: "Customer Name" ≠ "customer name"
+Best practice: use lowercase_with_underscores for aliases, avoid spaces entirely
+Alias in WHERE: NOT allowed (WHERE executes before SELECT)
+Alias in ORDER BY: Allowed (ORDER BY executes after SELECT)
+Reserved words as aliases require quoting: AS "select" — but don't do this, use non-reserved names
+You can alias a column to the same name as another column: SELECT name AS city — valid but confusing
+
+3. DISTINCT — Removing Duplicate Rows 
+SELECT DISTINCT city FROM customers; returns only unique city values
+DISTINCT must come immediately after SELECT, before the column list
+DISTINCT only affects the query result — the actual table is unchanged
+DISTINCT on multiple columns deduplicates based on the COMBINATION of all listed columns
+SELECT DISTINCT city, name → unique (city, name) pairs, not unique cities AND unique names separately
+DISTINCT treats all NULLs as equal for deduplication — multiple NULLs collapse into one NULL row
+SELECT DISTINCT * considers ALL columns together — if any column differs, rows are distinct
+COUNT(DISTINCT column) returns the NUMBER of unique values (a single number)
+SELECT DISTINCT column returns the actual unique VALUES (one row per unique value)
+DISTINCT is universal across all SQL databases — same syntax and behavior everywhere
