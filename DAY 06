@@ -1,0 +1,27 @@
+1. DISTINCT on Multiple Columns 
+SELECT DISTINCT city, email FROM customers; deduplicates based on the COMBINATION of both columns.
+The Trap: It does NOT deduplicate each column independently. (Delhi, amit@mail.com) and (Delhi, NULL) are considered two different, unique combinations.
+Adding more columns to a DISTINCT clause makes it harder for rows to be considered duplicates, so you typically get more rows (or the same), never fewer.
+NULLs are grouped together as one distinct value in multi-column DISTINCT, just like single-column DISTINCT.
+
+2. Arithmetic Operators & Precedence 
+Operators: + (add), - (subtract), * (multiply), / (divide), % (modulo/remainder).
+Integer Division Truncation: If BOTH numbers are integers, PostgreSQL chops off the decimal (truncates). 7 / 2 = 3. To get 3.5, at least one number must be a decimal: 7.0 / 2 or 7 / 2.0.
+Precedence: *, /, and % are calculated BEFORE + and -. (e.g., 2 + 3 * 4 = 14). Use parentheses () to override precedence (e.g., (2 + 3) * 4 = 20).
+NULL Poisoning: Any math involving NULL results in NULL. 50000 + NULL = NULL.
+The Fix: Use COALESCE(column, 0) to turn NULLs into zeros before doing math.
+Division by Zero: 5 / 0 throws a hard ERROR. It does not return NULL or infinity.
+
+3. SQL Formatting Rules 
+Rule 1: Capitalize SQL keywords (SELECT, FROM, WHERE). Keep table/column names lowercase.
+Rule 2: Put each major clause on its own line.
+Rule 3: Indent consistently (usually 4 spaces) to show hierarchy.
+PostgreSQL Behavior: PostgreSQL completely ignores whitespace (spaces, tabs, newlines). Formatting is 100% for human readability and has ZERO effect on execution speed.
+Trailing vs Leading Commas: Put commas at the end of the line (trailing), never after the very last column.
+
+4. Table Aliases & Dot Notation 
+Table Alias: A temporary nickname for a table, valid ONLY inside that specific query. (e.g., FROM customers AS c or FROM customers c). The AS keyword is optional for tables.
+Dot Notation: alias.column (e.g., c.id) tells PostgreSQL exactly which table a column belongs to. No spaces allowed around the dot.
+Fully Qualified Name: schema.table.column (e.g., public.customers.id). Used when working across different schemas.
+Ambiguity Error: If two tables share a column name (like id), writing just SELECT id throws an ERROR: "column reference is ambiguous". You MUST use dot notation (c.id vs o.id).
+Derived Tables: A subquery in the FROM clause MUST have an alias, or PostgreSQL throws a syntax error.
