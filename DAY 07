@@ -1,0 +1,39 @@
+1. SELECT without FROM 
+PostgreSQL allows SELECT without a FROM clause for expressions, functions, and constants.
+SELECT 10 + 5; → 15 (database as calculator)
+SELECT NOW(); → current timestamp (database as clock)
+SELECT 'hello'; → hello (constant string)
+Returns exactly ONE row.
+SELECT *; without FROM → ERROR: "SELECT * with no tables specified"
+Oracle requires FROM DUAL; PostgreSQL and MySQL do not.
+You CANNOT reference column names without a FROM clause.
+
+2. Alias in WHERE vs ORDER BY — Execution Order 
+Logical execution order: FROM → WHERE → SELECT → ORDER BY → LIMIT
+This is NOT the order you TYPE the query.
+Column alias in WHERE: ❌ NOT allowed (WHERE executes before SELECT; alias doesn't exist yet)
+Column alias in ORDER BY: ✅ Allowed (ORDER BY executes after SELECT; alias already exists)
+Table alias in WHERE: ✅ Allowed (FROM executes first; table alias already defined)
+Fix for WHERE: Repeat the full expression instead of using the alias.
+PostgreSQL is lenient in allowing aliases in GROUP BY and HAVING (non-standard; SQL Server/Oracle don't allow it).
+
+3. WHERE Clause Basics 
+WHERE filters rows BEFORE any other processing (except FROM).
+Each row is examined: does it satisfy the condition? YES → kept. NO → blocked.
+WHERE executes SECOND logically (after FROM, before SELECT).
+WHERE can reference table columns and table aliases.
+WHERE CANNOT use column aliases from SELECT.
+WHERE CANNOT use aggregate functions (COUNT, SUM, etc.)
+
+4. Comparison Operators 
+= → Equal to (COMPARISON, not assignment)
+!= → Not equal to
+<> → Not equal to (ANSI standard; identical to != in PostgreSQL)
+> → Greater than
+< → Less than
+>= → Greater than or equal to
+<= → Less than or equal to
+String comparisons are CASE-SENSITIVE by default: 'Delhi' ≠ 'delhi'
+Single quotes for string VALUES: 'Delhi'
+Double quotes for IDENTIFIERS: "Delhi" → looks for a column named Delhi → ERROR
+No quotes around a word → treated as column name → ERROR if no such column exists
