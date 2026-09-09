@@ -1,0 +1,34 @@
+1. IN Operator 
+WHERE city IN ('Delhi', 'Mumbai', 'Pune') is equivalent to WHERE city = 'Delhi' OR city = 'Mumbai' OR city = 'Pune'
+Cleaner, more readable, and usually faster than chaining OR conditions
+The list MUST be enclosed in parentheses: IN (...)
+String values need single quotes: IN ('Delhi', 'Mumbai')
+Numeric values do NOT need quotes: IN (45000, 60000)
+No trailing comma after the last item
+Empty list IN () is a syntax error
+Single-value list IN ('Delhi') works but is pointless — just use =
+NOT IN negates the check: returns rows where the value is NOT in the list
+
+2. ANY / ALL / SOME with Arrays 
+= ANY(ARRAY[...]) is equivalent to IN (...)
+> ALL(ARRAY[40000, 50000]) means "greater than EVERY value" (simplifies to > max)
+> ANY(ARRAY[40000, 50000]) means "greater than AT LEAST ONE value" (simplifies to > min)
+< ALL(ARRAY[50000, 60000]) means "less than EVERY value" (simplifies to < min)
+= ALL(ARRAY[40000, 50000]) is impossible (can't equal two different values) → zero rows
+SOME is a complete synonym for ANY — identical behavior
+ANY/ALL with ARRAY[...] syntax is PostgreSQL-specific (native array support)
+ANY/ALL with subqueries is universal SQL
+For array COLUMNS (like tags TEXT[]), you MUST use = ANY(tags) — IN cannot compare against array columns directly
+
+3. NOT IN + NULL Bug 
+WHERE id NOT IN (1, 2, NULL) returns ZERO rows — always, silently, no error
+Why: Comparing any value to NULL yields UNKNOWN. NOT (FALSE OR FALSE OR UNKNOWN) = NOT UNKNOWN = UNKNOWN. UNKNOWN is not TRUE, so the row is excluded. This happens for EVERY row.
+Three-valued logic: SQL has TRUE, FALSE, and UNKNOWN. Only TRUE rows pass WHERE.
+The fix — Option 1: Filter NULLs out: WHERE id NOT IN (SELECT col FROM t WHERE col IS NOT NULL)
+The fix — Option 2: Use NOT EXISTS (full syntax Day 37): checks row existence, not value equality. NULL doesn't poison existence checks.
+This bug is UNIVERSAL — affects PostgreSQL, MySQL, SQL Server, Oracle, SQLite equally.
+
+4. Safety Habits 
+ALWAYS run your WHERE clause as a SELECT first before switching to UPDATE or DELETE
+Verify the exact rows that will be affected before executing destructive operations
+Transactions (preview, full coverage Day 55-58): BEGIN; ... COMMIT; or ROLLBACK; provides a safety net for manual data fixes
