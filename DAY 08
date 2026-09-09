@@ -1,0 +1,32 @@
+1. AND, OR, NOT — Logical Operators 
+AND: Both conditions must be TRUE for the row to pass.
+OR: At least ONE condition must be TRUE for the row to pass.
+NOT: Reverses the result of a condition.
+Precedence: AND binds tighter than OR. a OR b AND c means a OR (b AND c), NOT (a OR b) AND c.
+Fix: ALWAYS use parentheses when mixing AND and OR.
+
+2. Parentheses for Clarity 
+Parentheses () override precedence, just like in math.
+WHERE (city = 'Delhi' OR city = 'Mumbai') AND salary > 50000 ensures the OR is evaluated first.
+Without parentheses, the logic silently changes and returns wrong data with NO error.
+
+3. BETWEEN — Inclusive Range 
+WHERE age BETWEEN 28 AND 35 is equivalent to WHERE age >= 28 AND age <= 35.
+Inclusive on BOTH ends. Both 28 and 35 are included.
+WHERE age NOT BETWEEN 28 AND 35 is equivalent to WHERE age < 28 OR age > 35. Excludes the entire range.
+
+4. BETWEEN with TIMESTAMP — The Midnight Trap
+BETWEEN '2024-01-01' AND '2024-01-31' on a TIMESTAMP column only captures up to midnight of Jan 31st.
+Everything after midnight on the 31st (like '2024-01-31 14:00:00') is EXCLUDED.
+Fix: Use >= '2024-01-01' AND < '2024-02-01' (first day of NEXT month).
+Golden Rule: NEVER use the last day of the month as upper bound for TIMESTAMP ranges. ALWAYS use < 'first day of next month'.
+
+5. BETWEEN SYMMETRIC — PostgreSQL-Specific
+Plain BETWEEN 10 AND 1 returns ZERO rows (impossible: value can't be >= 10 AND <= 1).
+BETWEEN SYMMETRIC 10 AND 1 works correctly — Postgres figures out which bound is lower.
+PostgreSQL-specific (also SQL standard, but NOT supported in MySQL, SQL Server, or Oracle).
+
+6. NULL with BETWEEN
+If the column value is NULL, BETWEEN evaluates to UNKNOWN (not TRUE, not FALSE).
+The row is silently excluded from BOTH BETWEEN and NOT BETWEEN results.
+Fix: Add OR age IS NULL explicitly if NULLs should be included.
