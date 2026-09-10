@@ -1,0 +1,32 @@
+1. Implicit Type Conversion & Strict Typing 
+PostgreSQL has a strict type system. It refuses to silently convert between incompatible types.
+Text column = Number literal → ERROR. WHERE phone = 9876543210 fails because phone is TEXT and 9876543210 is INTEGER.
+Number column = Text literal → WORKS. WHERE salary = '60000' works because Postgres can safely cast the literal to match the column type. But this is bad practice — always match types explicitly.
+The rule: The COLUMN is the "boss." The literal gets converted to match the column's type. If the column is text, Postgres refuses to convert the entire column to match a number literal.
+Always match types explicitly: Use quotes for text columns (WHERE phone = '9876543210'), no quotes for numeric columns (WHERE salary = 60000).
+
+2. Explicit Casting: CAST() and ::
+ANSI standard: CAST('123' AS INTEGER)
+PostgreSQL shorthand: '123'::INTEGER (preferred in Postgres code)
+Both do the same thing. :: is PostgreSQL-specific, CAST() is universal.
+No spaces around ::: '123' :: INTEGER → SYNTAX ERROR. Must be '123'::INTEGER.
+Dirty data fails loudly: '123abc'::INTEGER → ERROR. PostgreSQL does NOT silently truncate to 123.
+NULL casting: NULL::INTEGER returns NULL (no error).
+Arithmetic requires matching types: '5' + 10 → ERROR. Must cast: '5'::INTEGER + 10.
+LENGTH() requires text: LENGTH(98765) → ERROR. Must cast: LENGTH(98765::TEXT).
+
+3. LIKE Pattern Matching 
+% wildcard: Matches ANY number of characters (including zero).
+_ wildcard: Matches EXACTLY ONE character.
+LIKE is CASE-SENSITIVE in PostgreSQL. 'A%' does NOT match 'amit'. 'a%' does NOT match 'Amit'.
+Pattern must be in single quotes: LIKE 'A%' not LIKE A%.
+Common patterns:
+'A%' → starts with A
+'%a' → ends with a
+'%li%' → contains 'li' anywhere
+'_a%' → second letter is 'a'
+'___' → exactly 3 characters
+'A___' → starts with A and is exactly 4 characters
+'%' → matches everything (any non-NULL string)
+LIKE on non-text columns: ERROR. Must cast to TEXT first.
+NULL with LIKE: NULL LIKE 'A%' → UNKNOWN → row excluded from results.
